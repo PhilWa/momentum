@@ -1,0 +1,9 @@
+*.ipynb
+*.csv
+*.env
+*.txt
+*.sqlite
+*.db
+
+# Data dir
+data/*
