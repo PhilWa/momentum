@@ -47,7 +47,7 @@ class TradingStrategy:
             else 0
         )
 
-    def sell_positions(self, date):
+    def sell_positions(self, date, hold_period_m=1):
         buy_log = self.trade_log[self.trade_log["Action"] == "BUY"]
         buy_log_grouped = buy_log.groupby("Ticker")["Quantity"].sum()
         sell_log = self.trade_log[self.trade_log["Action"] == "SELL"]
@@ -57,7 +57,7 @@ class TradingStrategy:
         for ticker in positions.index:
             if positions[ticker] > 0:
                 last_buy_date = buy_log[buy_log["Ticker"] == ticker]["Date"].max()
-                if (date - last_buy_date).days >= 30:
+                if (date - last_buy_date).days >= (30 * hold_period_m):
                     self.sell_position(ticker, date)
 
     def sell_position(self, ticker, date):
