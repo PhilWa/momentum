@@ -112,7 +112,7 @@ class TradingStrategy:
 
     def buy_positions(self, date, top_n=3):
         tickers_momentum = self.get_tickers_momentum(date)
-        cash_per_position = self.cash_balance / 3
+        cash_per_position = self.cash_balance / top_n
         for ticker, momentum in tickers_momentum[:top_n]:
             if momentum > 0 and self.cash_balance > 0:
                 self.buy_position(ticker, date, cash_per_position)
@@ -163,7 +163,7 @@ class TradingStrategy:
             print(" New day:", closest_trading_day, "------")
             if not self.trade_log.empty:
                 self.sell_positions(closest_trading_day)
-            self.buy_positions(closest_trading_day)
+            self.buy_positions(closest_trading_day, top_n=3)
         self.save_log()
 
     @staticmethod
@@ -200,4 +200,6 @@ exclusion_list = [
 
 trade_list = [ticker for ticker in universe if ticker not in exclusion_list]
 strategy = TradingStrategy(trade_list)
-strategy.run("2022-05-01", "2023-1-31")
+start_date = "2022-05-01"
+end_date = "2023-1-31"
+strategy.run(start_date, end_date)
