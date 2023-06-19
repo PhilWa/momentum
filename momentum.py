@@ -63,9 +63,9 @@ class TradingStrategy:
     def sell_position(self, ticker, date):
         df = self.get_data(ticker, date, date + timedelta(days=3))
         if not df.empty:
-            self.execute_sell(df, ticker, date)
+            self.execute_sell(df, ticker, date, trading_fee=0.5)
 
-    def execute_sell(self, df, ticker, date):
+    def execute_sell(self, df, ticker, date, trading_fee: float = 0.0):
         quantity_to_sell = (
             self.trade_log[
                 (self.trade_log["Ticker"] == ticker)
@@ -79,6 +79,8 @@ class TradingStrategy:
 
         if quantity_to_sell > 0:
             current_price = df["Close"][-1]
+            sell_price = quantity_to_sell * current_price
+            sell_price -= trading_fee
             self.cash_balance += quantity_to_sell * current_price
             buy_price = self.trade_log[
                 (self.trade_log["Ticker"] == ticker)
@@ -128,10 +130,13 @@ class TradingStrategy:
         df = self.get_data(ticker, date, date + timedelta(days=3))
         if not df.empty:
             print("🛍️ Buy", ticker, " for 💵 ", np.round(cash_per_position, 2), "USD")
-            self.execute_buy(df, ticker, date, cash_per_position)
+            self.execute_buy(df, ticker, date, cash_per_position, trading_fee=0.5)
 
-    def execute_buy(self, df, ticker, date, cash_per_position):
+    def execute_buy(
+        self, df, ticker, date, cash_per_position, trading_fee: float = 0.0
+    ):
         current_price = df["Close"][-1]
+        cash_per_position -= trading_fee
         quantity = cash_per_position / current_price
         self.cash_balance -= cash_per_position
         self.trade_log = self.trade_log.append(
@@ -172,7 +177,7 @@ class TradingStrategy:
                 self.trade_log.to_csv(f, header=f.tell() == 0, index=False)
 
 
-tickers = [
+universe = [
     "XLK",
     "XLV",
     "XLF",
@@ -185,5 +190,14 @@ tickers = [
     "XLRE",
     "XLB",
 ]
-strategy = TradingStrategy(tickers)
+
+exclusion_list = [
+    "XLU",
+    "XLE",
+    "XLRE",
+    "XLB",
+]
+
+trade_list = [ticker for ticker in universe if ticker not in exclusion_list]
+strategy = TradingStrategy(trade_list)
 strategy.run("2022-05-01", "2023-1-31")
