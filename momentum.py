@@ -3,6 +3,7 @@ import yfinance as yf
 import pandas_market_calendars as mcal
 from datetime import datetime, timedelta
 import numpy as np
+from dateutil.relativedelta import relativedelta
 
 
 class TradingStrategy:
@@ -21,9 +22,12 @@ class TradingStrategy:
             ],
         )
 
-    def calculate_momentum(self, ticker, date):
-        start_date = date - timedelta(days=365)
-        df = self.get_data(ticker, start_date, date)
+    def calculate_momentum(self, ticker, date, lookback_period=13):
+        start_date = date - relativedelta(months=lookback_period)
+        momentum_date = date - relativedelta(
+            months=1
+        )  # 2022-05-02 00:00:00 -> 2022-04-02 00:00:00
+        df = self.get_data(ticker, start_date, momentum_date)
         return self.compute_momentum(df)
 
     @staticmethod
