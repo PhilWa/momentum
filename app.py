@@ -263,7 +263,7 @@ def update_output(
             data_dict = df.iloc[-1].to_dict()
 
             # Save the data as JSON
-            with open(f"{unique_id}.json", "w") as json_file:
+            with open(f"data/{unique_id}.json", "w") as json_file:
                 json.dump(data_dict, json_file)
 
             return f"Data saved as JSON with ID: {unique_id}"
