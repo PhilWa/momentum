@@ -2,6 +2,7 @@ import yfinance as yf
 import numpy as np
 import pandas as pd
 from datetime import datetime
+import pandas_market_calendars as mcal
 
 
 class TradingSimulator:
@@ -22,9 +23,9 @@ class TradingSimulator:
     @staticmethod
     def trade(ticker, buy_date, sell_date, capital, filename="trade_log.tsv"):
         data = TradingSimulator.get_data(ticker, buy_date, sell_date)
-
         if data is not None and not data.empty:
-            trading_days = np.sort(data.index.values)
+            nyse = mcal.get_calendar("NYSE")
+            trading_days = nyse.schedule(start_date=buy_date, end_date=sell_date).index
             buy_date = TradingSimulator.get_closest_trading_day(
                 np.datetime64(buy_date), trading_days
             )
@@ -50,4 +51,7 @@ class TradingSimulator:
 # Buy and sell simulation
 buy_date = "2022-02-01"
 sell_date = "2023-03-01"
-TradingSimulator.trade("SPY", buy_date, sell_date, 100000)
+# TradingSimulator.trade("SPY", buy_date, sell_date, 100_000)
+
+data = TradingSimulator.get_data("SPY", buy_date, sell_date)
+print(data.index)
