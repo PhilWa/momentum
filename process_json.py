@@ -14,7 +14,7 @@ def get_latest_json(dir_path: str) -> str:
 
     # Get the path of the most recently modified .json file.
     latest_json_file = os.path.join(dir_path, json_files[-1])
-    return latest_json_file
+    return latest_json_file, json_files[-1]
 
 
 def load_json(str_path: str) -> dict:
@@ -78,7 +78,7 @@ def modify_data(data: dict) -> dict:
 
 def get_params(dir: str = "data") -> dict:
     # Get the path of the most recently modified .json file.
-    latest_json_file = get_latest_json(dir)
+    latest_json_file, fname = get_latest_json(dir)
 
     # Load the .json file at the given path.
     data = load_json(latest_json_file)
@@ -87,7 +87,7 @@ def get_params(dir: str = "data") -> dict:
     data = modify_data(data)
 
     # Output the modified data.
-    return data
+    return data, os.path.splitext(fname)[0]
 
 
 print(get_params())

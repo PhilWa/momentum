@@ -9,7 +9,7 @@ import warnings
 
 warnings.filterwarnings("ignore")  # should be removed in production
 
-data = get_params("data")
+data, parameter_hash = get_params("data")
 
 START_DATE = data["Start_Date"]
 END_DATE = data["End_Date"]
@@ -35,7 +35,9 @@ class TradingStrategy:
                 "Quantity",
                 "Price",
                 "PnL",
+                "cash_balance",
                 "Timestamp",
+                "parameter_hash",
             ],
         )
 
@@ -126,8 +128,9 @@ class TradingStrategy:
                     "Quantity": np.round(quantity_to_sell, 2),
                     "Price": np.round(current_price, 2),
                     "PnL": np.round(trade_pnl, 2),
-                    "cash_balance": self.cash_balance,
+                    "cash_balance": np.round(self.cash_balance, 2),
                     "Timestamp": datetime.now(),
+                    "parameter_hash": parameter_hash,
                 },
                 ignore_index=True,
             )
@@ -169,8 +172,9 @@ class TradingStrategy:
                 "Quantity": np.round(quantity, 2),
                 "Price": np.round(current_price, 2),
                 "PnL": None,
-                "cash_balance": self.cash_balance,
+                "cash_balance": np.round(self.cash_balance, 2),
                 "Timestamp": datetime.now(),
+                "parameter_hash": parameter_hash,
             },
             ignore_index=True,
         )
