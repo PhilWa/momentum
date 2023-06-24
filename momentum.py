@@ -4,12 +4,29 @@ import pandas_market_calendars as mcal
 from datetime import datetime, timedelta
 import numpy as np
 from dateutil.relativedelta import relativedelta
+from process_json import get_params
+import warnings
+
+warnings.filterwarnings("ignore")  # should be removed in production
+
+data = get_params("data")
+
+START_DATE = data["Start_Date"]
+END_DATE = data["End_Date"]
+STARTING_BALANCE = data["Starting_Balance"]
+
+LOOK_BACK_PERIODS = data["Look_Back_Periods"]  # (13, 'm')
+
+SKIP_LAST_PERIOD = data["Skip_Last_Period"]  # False
+HOLD_PERIOD = data["Rebalancing"][0]  # (1, 'm')
+N_HOLDINGS = data["Holdings"]  # 3
+FEE_PER_TRADE = data["Fee_Per_Trade"]
 
 
 class TradingStrategy:
     def __init__(self, tickers):
         self.tickers = tickers
-        self.cash_balance = 100000
+        self.cash_balance = STARTING_BALANCE
         self.trade_log = pd.DataFrame(
             columns=[
                 "Date",
@@ -22,8 +39,8 @@ class TradingStrategy:
             ],
         )
 
-    def calculate_momentum(self, ticker, date, lookback_period=13):
-        start_date = date - relativedelta(months=lookback_period)
+    def calculate_momentum(self, ticker, date):
+        start_date = date - relativedelta(months=LOOK_BACK_PERIODS[0])
         momentum_date = date - relativedelta(
             months=1
         )  # 2022-05-02 00:00:00 -> 2022-04-02 00:00:00
@@ -51,7 +68,7 @@ class TradingStrategy:
             else 0
         )
 
-    def sell_positions(self, date, hold_period_m=1):
+    def sell_positions(self, date, trading_fee: float, hold_period: int):
         buy_log = self.trade_log[self.trade_log["Action"] == "BUY"]
         buy_log_grouped = buy_log.groupby("Ticker")["Quantity"].sum()
         sell_log = self.trade_log[self.trade_log["Action"] == "SELL"]
@@ -61,15 +78,15 @@ class TradingStrategy:
         for ticker in positions.index:
             if positions[ticker] > 0:
                 last_buy_date = buy_log[buy_log["Ticker"] == ticker]["Date"].max()
-                if (date - last_buy_date).days >= (30 * hold_period_m):
-                    self.sell_position(ticker, date)
+                if (date - last_buy_date).days >= (30 * hold_period):
+                    self.sell_position(ticker, date, trading_fee)
 
-    def sell_position(self, ticker, date):
+    def sell_position(self, ticker, date, trading_fee):
         df = self.get_data(ticker, date, date + timedelta(days=3))
         if not df.empty:
-            self.execute_sell(df, ticker, date, trading_fee=0.5)
+            self.execute_sell(df, ticker, date, trading_fee)
 
-    def execute_sell(self, df, ticker, date, trading_fee: float = 0.0):
+    def execute_sell(self, df, ticker, date, trading_fee):
         quantity_to_sell = (
             self.trade_log[
                 (self.trade_log["Ticker"] == ticker)
@@ -109,15 +126,16 @@ class TradingStrategy:
                     "Quantity": np.round(quantity_to_sell, 2),
                     "Price": np.round(current_price, 2),
                     "PnL": np.round(trade_pnl, 2),
+                    "cash_balance": self.cash_balance,
                     "Timestamp": datetime.now(),
                 },
                 ignore_index=True,
             )
 
-    def buy_positions(self, date, top_n=3):
+    def buy_positions(self, date, trading_fee, n_holdings):
         tickers_momentum = self.get_tickers_momentum(date)
-        cash_per_position = self.cash_balance / top_n
-        for ticker, momentum in tickers_momentum[:top_n]:
+        cash_per_position = self.cash_balance / n_holdings
+        for ticker, momentum in tickers_momentum[:n_holdings]:
             if momentum > 0 and self.cash_balance > 0:
                 self.buy_position(ticker, date, cash_per_position)
 
@@ -151,6 +169,7 @@ class TradingStrategy:
                 "Quantity": np.round(quantity, 2),
                 "Price": np.round(current_price, 2),
                 "PnL": None,
+                "cash_balance": self.cash_balance,
                 "Timestamp": datetime.now(),
             },
             ignore_index=True,
@@ -159,6 +178,7 @@ class TradingStrategy:
     def run(self, start_date, end_date):
         print("💫 New run:", datetime.now())
         print("💼 Tickers: ", self.tickers)
+        print("Top N holdings: ", N_HOLDINGS)
         nyse = mcal.get_calendar("NYSE")
         trading_days = nyse.schedule(start_date=start_date, end_date=end_date).index
         for date in pd.date_range(start_date, end_date, freq="MS"):
@@ -166,8 +186,8 @@ class TradingStrategy:
             print("🌱 New month:", date, "------")
             print(" New day:", closest_trading_day, "------")
             if not self.trade_log.empty:
-                self.sell_positions(closest_trading_day)
-            self.buy_positions(closest_trading_day, top_n=3)
+                self.sell_positions(closest_trading_day, FEE_PER_TRADE, HOLD_PERIOD)
+            self.buy_positions(closest_trading_day, FEE_PER_TRADE, N_HOLDINGS)
         self.save_log()
 
     @staticmethod
@@ -204,6 +224,8 @@ exclusion_list = [
 
 trade_list = [ticker for ticker in universe if ticker not in exclusion_list]
 strategy = TradingStrategy(trade_list)
-start_date = "2022-05-01"
-end_date = "2023-1-31"
-strategy.run(start_date, end_date)
+
+
+START_DATE = "2022-05-01"
+END_DATE = "2023-1-31"
+strategy.run(START_DATE, END_DATE)

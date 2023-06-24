@@ -54,7 +54,7 @@ def split_into_time_and_period(data_str: str) -> dict:
     match = re.match(r"(\d+)(\D+)", data_str, re.I)
     if match:
         items = match.groups()
-        return int(items[0]), items[1]
+        return (int(items[0]), items[1])
     else:
         ValueError("Something went wrong.")
 
@@ -68,7 +68,7 @@ def modify_data(data: dict) -> dict:
     data["Start_Date"] = get_date(data["Start_Date"])
     data["End_Date"] = get_date(data["End_Date"])
     data["Starting_Balance"] = check_for_number(data["Starting_Balance"], "int")
-    data["Look_Back_Periods"] = split_into_time_and_period(data["End_Date"])
+    data["Look_Back_Periods"] = split_into_time_and_period(data["Look_Back_Periods"])
     data["Skip_Last_Period"] = curate_skip_last_period(data["Skip_Last_Period"])
     data["Rebalancing"] = split_into_time_and_period(data["Rebalancing"])
     data["Holdings"] = check_for_number(data["Holdings"], "int")
@@ -76,7 +76,7 @@ def modify_data(data: dict) -> dict:
     return data
 
 
-def proceess_json(dir: str = "data") -> dict:
+def get_params(dir: str = "data") -> dict:
     # Get the path of the most recently modified .json file.
     latest_json_file = get_latest_json(dir)
 
@@ -88,3 +88,6 @@ def proceess_json(dir: str = "data") -> dict:
 
     # Output the modified data.
     return data
+
+
+print(get_params())
