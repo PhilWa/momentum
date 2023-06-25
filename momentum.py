@@ -154,23 +154,25 @@ class TradingStrategy:
     def buy_position(self, ticker, date, cash_per_position):
         df = self.get_data(ticker, date, date + timedelta(days=3))
         if not df.empty:
-            print("🛍️ Buy", ticker, " for 💵 ", np.round(cash_per_position, 2), "USD")
+            print("🛍️ Buy ", ticker, " for 💵 ", np.round(cash_per_position, 2), "USD")
             self.execute_buy(df, ticker, date, cash_per_position, trading_fee=0.5)
 
     def execute_buy(
         self, df, ticker, date, cash_per_position, trading_fee: float = 0.0
     ):
-        current_price = df["Close"][-1]
+        share_price = df["Close"][-1]
         cash_per_position -= trading_fee
-        quantity = cash_per_position / current_price
-        self.cash_balance -= cash_per_position
+        n_whole_shares = cash_per_position // share_price
+        cash_remainder = cash_per_position % share_price
+        cash_remainder -= trading_fee
+        self.cash_balance -= cash_remainder
         self.trade_log = self.trade_log.append(
             {
                 "Date": date,
                 "Ticker": ticker,
                 "Action": "BUY",
-                "Quantity": np.round(quantity, 2),
-                "Price": np.round(current_price, 2),
+                "Quantity": n_whole_shares,
+                "Price": np.round(share_price, 2),
                 "PnL": None,
                 "cash_balance": np.round(self.cash_balance, 2),
                 "Timestamp": datetime.now(),
