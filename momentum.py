@@ -229,7 +229,4 @@ exclusion_list = [
 trade_list = [ticker for ticker in universe if ticker not in exclusion_list]
 strategy = TradingStrategy(trade_list)
 
-
-START_DATE = "2022-05-01"
-END_DATE = "2023-1-31"
 strategy.run(START_DATE, END_DATE)
