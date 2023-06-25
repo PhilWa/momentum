@@ -86,7 +86,7 @@ def get_params(dir: str = "data") -> dict:
     # Modify the fields in the data.
     data = modify_data(data)
 
-    # Output the modified data.
+    # Output the modified data and unique id.
     return data, os.path.splitext(fname)[0]
 
 

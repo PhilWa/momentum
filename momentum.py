@@ -13,10 +13,10 @@ data, parameter_hash = get_params("data")
 
 START_DATE = data["Start_Date"]
 END_DATE = data["End_Date"]
+
 STARTING_BALANCE = data["Starting_Balance"]
 
-LOOK_BACK_PERIODS = data["Look_Back_Periods"]  # (13, 'm')
-
+LOOK_BACK_PERIODS = data["Look_Back_Periods"][0]  # (13, 'm')
 SKIP_LAST_PERIOD = data["Skip_Last_Period"]  # False
 HOLD_PERIOD = data["Rebalancing"][0]  # (1, 'm')
 N_HOLDINGS = data["Holdings"]  # 3
@@ -42,9 +42,10 @@ class TradingStrategy:
         )
 
     def calculate_momentum(self, ticker, date):
-        start_date = date - relativedelta(months=LOOK_BACK_PERIODS[0])
+        start_date = date - relativedelta(months=LOOK_BACK_PERIODS)
+        one_month = 1 if SKIP_LAST_PERIOD else 0
         momentum_date = date - relativedelta(
-            months=1
+            months=one_month
         )  # 2022-05-02 00:00:00 -> 2022-04-02 00:00:00
         df = self.get_data(ticker, start_date, momentum_date)
         return self.compute_momentum(df)
