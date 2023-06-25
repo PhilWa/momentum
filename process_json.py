@@ -1,6 +1,5 @@
 import os
 import json
-from datetime import datetime, timedelta
 import re
 
 
@@ -88,6 +87,3 @@ def get_params(dir: str = "data") -> dict:
 
     # Output the modified data and unique id.
     return data, os.path.splitext(fname)[0]
-
-
-print(get_params())
