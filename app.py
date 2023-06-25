@@ -1,11 +1,13 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-
 from dash.dependencies import Input, Output
 import pandas as pd
-import json
+from process_json import get_latest_json
+import subprocess
+import os
 import uuid
+import json
 
 # Initialize the DataFrame
 df = pd.DataFrame(
@@ -20,8 +22,6 @@ df = pd.DataFrame(
         "Fee_Per_Trade",
     ]
 )
-
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -183,6 +183,13 @@ app.layout = dbc.Container(
                             id="save-json-button",
                             n_clicks=0,
                             color="primary",
+                            className="mt-4 me-2",
+                        ),
+                        dbc.Button(
+                            "Run Backtest",
+                            id="run-backtest-button",
+                            n_clicks=0,
+                            color="primary",
                             className="mt-4",
                         ),
                     ],
@@ -194,6 +201,11 @@ app.layout = dbc.Container(
         dbc.Row(
             [
                 dbc.Col([html.Div(id="output-div", className="mt-4")]),
+            ],
+        ),
+        dbc.Row(
+            [
+                dbc.Col([html.Div(id="output-div-backtest", className="mt-4")]),
             ],
         ),
     ],
@@ -267,6 +279,26 @@ def update_output(
                 json.dump(data_dict, json_file)
 
             return f"Data saved as JSON with ID: {unique_id}"
+
+    return ""
+
+
+@app.callback(
+    Output("output-div-backtest", "children"),
+    Input("run-backtest-button", "n_clicks"),
+)
+def run_backtest(run_button_clicks):
+    if run_button_clicks > 0:
+        # Set the 'run_backtest' flag in the JSON file to true
+        if not df.empty:
+            data_dict = df.iloc[-1].to_dict()
+            data_dict["run_backtest"] = True
+            latest_json_file, _ = get_latest_json("data")
+            latest_uuid = os.path.splitext(latest_json_file)[0]
+            subprocess.call(["python", "momentum.py"])
+            return f"Running backtest based on: {latest_uuid}"
+        else:
+            return "No parameters specified to run backtest on. Please save some data first."
 
     return ""
 

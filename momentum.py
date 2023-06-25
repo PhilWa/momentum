@@ -182,19 +182,36 @@ class TradingStrategy:
         )
 
     def run(self, start_date, end_date):
-        print("💫 New run:", datetime.now())
+        start_time = datetime.now()
+        print(
+            "💫 New run:",
+            start_time,
+            "Starting date: ",
+            start_date,
+            "End_date:",
+            end_date,
+        )
         print("💼 Tickers: ", self.tickers)
         print("Top N holdings: ", N_HOLDINGS)
         nyse = mcal.get_calendar("NYSE")
         trading_days = nyse.schedule(start_date=start_date, end_date=end_date).index
         for date in pd.date_range(start_date, end_date, freq="MS"):
             closest_trading_day = self.get_closest_trading_day(date, trading_days)
-            print("🌱 New month:", date, "------")
-            print(" New day:", closest_trading_day, "------")
+            print("🌱 New month:", date)
+            print(" New day:", closest_trading_day)
             if not self.trade_log.empty:
                 self.sell_positions(closest_trading_day, FEE_PER_TRADE, HOLD_PERIOD)
             self.buy_positions(closest_trading_day, FEE_PER_TRADE, N_HOLDINGS)
         self.save_log()
+        end_time = datetime.now()
+        print(
+            "🏁 Run complete on:",
+            end_time,
+            "elapsed time: ",
+            end_time - start_time,
+            "unique_id: ",
+            unique_id,
+        )
 
     @staticmethod
     def get_closest_trading_day(date, trading_days):
