@@ -103,8 +103,7 @@ class TradingStrategy:
 
         if quantity_to_sell > 0:
             current_price = df["Close"][-1]
-            sell_price = quantity_to_sell * current_price
-            sell_price -= trading_fee
+            self.cash_balance -= trading_fee
             self.cash_balance += quantity_to_sell * current_price
             buy_price = self.trade_log[
                 (self.trade_log["Ticker"] == ticker)
