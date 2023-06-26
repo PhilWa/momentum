@@ -81,7 +81,12 @@ class TradingStrategy:
         for ticker in positions.index:
             if positions[ticker] > 0:
                 last_buy_date = buy_log[buy_log["Ticker"] == ticker]["Date"].max()
-                if (date - last_buy_date).days >= (30 * hold_period):
+
+                # Normalize the dates to the first day of the month
+                _date = date.replace(day=1)
+                _last_buy_date = last_buy_date.replace(day=1)
+
+                if _date >= _last_buy_date + relativedelta(months=hold_period):
                     self.sell_position(ticker, date, trading_fee)
 
     def sell_position(self, ticker, date, trading_fee):
@@ -90,25 +95,28 @@ class TradingStrategy:
             self.execute_sell(df, ticker, date, trading_fee)
 
     def execute_sell(self, df, ticker, date, trading_fee):
+        # Get the quantity of the last bought record for this ticker
         quantity_to_sell = (
             self.trade_log[
                 (self.trade_log["Ticker"] == ticker)
                 & (self.trade_log["Action"] == "BUY")
-            ]["Quantity"].sum()
-            - self.trade_log[
-                (self.trade_log["Ticker"] == ticker)
-                & (self.trade_log["Action"] == "SELL")
-            ]["Quantity"].sum()
+            ]
+            .sort_values(by="Date", ascending=False)["Quantity"]
+            .values[0]
         )
 
         if quantity_to_sell > 0:
             current_price = df["Close"][-1]
             self.cash_balance -= trading_fee
             self.cash_balance += quantity_to_sell * current_price
-            buy_price = self.trade_log[
-                (self.trade_log["Ticker"] == ticker)
-                & (self.trade_log["Action"] == "BUY")
-            ]["Price"].values[0]
+            buy_price = (
+                self.trade_log[
+                    (self.trade_log["Ticker"] == ticker)
+                    & (self.trade_log["Action"] == "BUY")
+                ]
+                .sort_values(by="Date", ascending=False)["Price"]
+                .values[0]
+            )
             trade_pnl = (current_price - buy_price) * quantity_to_sell
             print(
                 "🛒 Sell",
