@@ -169,11 +169,9 @@ class TradingStrategy:
         self, df, ticker, date, cash_per_position, trading_fee: float = 0.0
     ):
         share_price = df["Close"][-1]
-        cash_per_position -= trading_fee
         n_whole_shares = cash_per_position // share_price
         cash_remainder = cash_per_position % share_price
-        cash_remainder -= trading_fee
-        self.cash_balance -= cash_remainder
+        self.cash_balance -= (cash_per_position - cash_remainder) + trading_fee
         self.trade_log = self.trade_log.append(
             {
                 "Date": date,
