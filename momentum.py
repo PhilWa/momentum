@@ -5,22 +5,25 @@ from datetime import datetime, timedelta
 import numpy as np
 from dateutil.relativedelta import relativedelta
 from process_json import get_params
+import uuid
 import warnings
 
 warnings.filterwarnings("ignore")  # should be removed in production
 
+# Backtest params
 data, unique_id = get_params("data")
 
 START_DATE = data["Start_Date"]
 END_DATE = data["End_Date"]
-
 STARTING_BALANCE = data["Starting_Balance"]
-
 LOOK_BACK_PERIODS = data["Look_Back_Periods"][0]  # (13, 'm')
 SKIP_LAST_PERIOD = data["Skip_Last_Period"]  # False
 HOLD_PERIOD = data["Rebalancing"][0]  # (1, 'm')
 N_HOLDINGS = data["Holdings"]  # 3
 FEE_PER_TRADE = data["Fee_Per_Trade"]
+
+# unique run ID
+unique_run_id = str(uuid.uuid4())
 
 
 class TradingStrategy:
@@ -37,7 +40,8 @@ class TradingStrategy:
                 "PnL",
                 "cash_balance",
                 "Timestamp",
-                "unique_id",
+                "unique_param_id",
+                "unique_run_id",
             ],
         )
 
@@ -138,7 +142,8 @@ class TradingStrategy:
                     "PnL": np.round(trade_pnl, 2),
                     "cash_balance": np.round(self.cash_balance, 2),
                     "Timestamp": datetime.now(),
-                    "unique_id": unique_id,
+                    "unique_param_id": unique_id,
+                    "unique_run_id": unique_run_id,
                 },
                 ignore_index=True,
             )
@@ -182,7 +187,8 @@ class TradingStrategy:
                 "PnL": None,
                 "cash_balance": np.round(self.cash_balance, 2),
                 "Timestamp": datetime.now(),
-                "unique_id": unique_id,
+                "unique_param_id": unique_id,
+                "unique_run_id": unique_run_id,
             },
             ignore_index=True,
         )
@@ -215,7 +221,7 @@ class TradingStrategy:
             end_time,
             "elapsed time: ",
             end_time - start_time,
-            "unique_id: ",
+            "unique_param_id: ",
             unique_id,
         )
 
