@@ -153,7 +153,7 @@ class TradingStrategy:
         cash_per_position = self.cash_balance / n_holdings
         for ticker, momentum in tickers_momentum[:n_holdings]:
             if momentum > 0 and self.cash_balance > 0:
-                self.buy_position(ticker, date, cash_per_position)
+                self.buy_position(ticker, date, cash_per_position, trading_fee)
 
     def get_tickers_momentum(self, date):
         tickers_momentum = [
@@ -164,15 +164,13 @@ class TradingStrategy:
         _ = [print(i[0], "|", i[1]) for i in tickers_momentum]
         return tickers_momentum
 
-    def buy_position(self, ticker, date, cash_per_position):
+    def buy_position(self, ticker, date, cash_per_position, trading_fee):
         df = self.get_data(ticker, date, date + timedelta(days=3))
         if not df.empty:
             print("🛍️ Buy ", ticker, " for 💵 ", np.round(cash_per_position, 2), "USD")
-            self.execute_buy(df, ticker, date, cash_per_position, trading_fee=0.5)
+            self.execute_buy(df, ticker, date, cash_per_position, trading_fee)
 
-    def execute_buy(
-        self, df, ticker, date, cash_per_position, trading_fee: float = 0.0
-    ):
+    def execute_buy(self, df, ticker, date, cash_per_position, trading_fee):
         share_price = df["Close"][-1]
         n_whole_shares = cash_per_position // share_price
         cash_remainder = cash_per_position % share_price
