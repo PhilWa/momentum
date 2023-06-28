@@ -171,7 +171,7 @@ class TradingStrategy:
             self.execute_buy(df, ticker, date, cash_per_position, trading_fee)
 
     def execute_buy(self, df, ticker, date, cash_per_position, trading_fee):
-        share_price = df["Close"][-1]
+        share_price = df["Close"][0]
         n_whole_shares = cash_per_position // share_price
         cash_remainder = cash_per_position % share_price
         self.cash_balance -= (cash_per_position - cash_remainder) + trading_fee
