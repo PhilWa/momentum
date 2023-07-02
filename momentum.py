@@ -7,23 +7,42 @@ from dateutil.relativedelta import relativedelta
 from process_json import get_params
 import uuid
 import warnings
+from gridsearch import (
+    START_DATE,
+    END_DATE,
+    STARTING_BALANCE,
+    LOOK_BACK_PERIODS,
+    SKIP_LAST_PERIOD,
+    HOLD_PERIOD,
+    N_HOLDINGS,
+    FEE_PER_TRADE,
+)
+import argparse
 
 warnings.filterwarnings("ignore")  # should be removed in production
 
-# Backtest params
-data, unique_id = get_params("data")
 
-START_DATE = data["Start_Date"]
-END_DATE = data["End_Date"]
-STARTING_BALANCE = data["Starting_Balance"]
-LOOK_BACK_PERIODS = data["Look_Back_Periods"][0]  # (13, 'm')
-SKIP_LAST_PERIOD = data["Skip_Last_Period"]  # False
-HOLD_PERIOD = data["Rebalancing"][0]  # (1, 'm')
-N_HOLDINGS = data["Holdings"]  # 3
-FEE_PER_TRADE = data["Fee_Per_Trade"]
+parser = argparse.ArgumentParser(description="A simple argument parser")
+parser.add_argument(
+    "-g", "--grid", default=False, type=bool, help="Activate grid search"
+)
+args = parser.parse_args()
 
-# unique run ID
-unique_run_id = str(uuid.uuid4())
+if not args.grid:
+    # Backtest params
+    data, unique_id = get_params("data")
+
+    START_DATE = data["Start_Date"]
+    END_DATE = data["End_Date"]
+    STARTING_BALANCE = data["Starting_Balance"]
+    LOOK_BACK_PERIODS = data["Look_Back_Periods"][0]  # (13, 'm')
+    SKIP_LAST_PERIOD = data["Skip_Last_Period"]  # False
+    HOLD_PERIOD = data["Rebalancing"][0]  # (1, 'm')
+    N_HOLDINGS = data["Holdings"]  # 3
+    FEE_PER_TRADE = data["Fee_Per_Trade"]
+
+    # unique run ID
+    unique_run_id = str(uuid.uuid4())
 
 
 class TradingStrategy:
