@@ -4,20 +4,10 @@ import pandas_market_calendars as mcal
 from datetime import datetime, timedelta
 import numpy as np
 from dateutil.relativedelta import relativedelta
-from process_json import get_params
 import uuid
 import warnings
-from gridsearch import (
-    START_DATE,
-    END_DATE,
-    STARTING_BALANCE,
-    LOOK_BACK_PERIODS,
-    SKIP_LAST_PERIOD,
-    HOLD_PERIOD,
-    N_HOLDINGS,
-    FEE_PER_TRADE,
-)
 import argparse
+from process_json import get_params
 
 warnings.filterwarnings("ignore")  # should be removed in production
 
@@ -28,21 +18,18 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-if not args.grid:
-    # Backtest params
-    data, unique_id = get_params("data")
+# Load the parameters from the JSON file
+data, unique_id = get_params("data")
 
-    START_DATE = data["Start_Date"]
-    END_DATE = data["End_Date"]
-    STARTING_BALANCE = data["Starting_Balance"]
-    LOOK_BACK_PERIODS = data["Look_Back_Periods"][0]  # (13, 'm')
-    SKIP_LAST_PERIOD = data["Skip_Last_Period"]  # False
-    HOLD_PERIOD = data["Rebalancing"][0]  # (1, 'm')
-    N_HOLDINGS = data["Holdings"]  # 3
-    FEE_PER_TRADE = data["Fee_Per_Trade"]
-
-    # unique run ID
-    unique_run_id = str(uuid.uuid4())
+START_DATE = data["Start_Date"]
+END_DATE = data["End_Date"]
+STARTING_BALANCE = data["Starting_Balance"]
+LOOK_BACK_PERIODS = data["Look_Back_Periods"][0]  # (13, 'm')
+SKIP_LAST_PERIOD = data["Skip_Last_Period"]  # False
+HOLD_PERIOD = data["Rebalancing"][0]  # (1, 'm')
+N_HOLDINGS = data["Holdings"]  # 3
+FEE_PER_TRADE = data["Fee_Per_Trade"]
+unique_run_id = str(uuid.uuid4())
 
 
 class TradingStrategy:
@@ -210,6 +197,15 @@ class TradingStrategy:
             ignore_index=True,
         )
 
+    def market_filter(self, indicator: str, smaller_than: int, date: str) -> bool:
+        if indicator != "^VIX":
+            raise ValueError("Only ^VIX is supported for the market filter.")
+        df = self.get_data(indicator, date, date + timedelta(days=3))
+        print("📈 Market filter:", indicator, "|", df["Close"][0])
+        return (
+            df["Close"][0] < smaller_than
+        )  # Wenn Vix> 30, dann verkauf, aber kauf keine neue Position
+
     def run(self, start_date, end_date):
         start_time = datetime.now()
         print(
@@ -228,9 +224,21 @@ class TradingStrategy:
             closest_trading_day = self.get_closest_trading_day(date, trading_days)
             print("🌱 New month:", date)
             print(" New day:", closest_trading_day)
+
             if not self.trade_log.empty:
-                self.sell_positions(closest_trading_day, FEE_PER_TRADE, HOLD_PERIOD)
-            self.buy_positions(closest_trading_day, FEE_PER_TRADE, N_HOLDINGS)
+                self.sell_positions(
+                    closest_trading_day,
+                    FEE_PER_TRADE,
+                    HOLD_PERIOD,
+                )
+
+            if self.market_filter(
+                indicator="^VIX",
+                smaller_than=30,
+                date=closest_trading_day,
+            ):
+                self.buy_positions(closest_trading_day, FEE_PER_TRADE, N_HOLDINGS)
+
         self.save_log()
         end_time = datetime.now()
         print(
