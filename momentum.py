@@ -266,20 +266,18 @@ universe = [
     "XLV",
     "XLF",
     "XLY",
-    "XLC",
+    "XLB",
     "XLI",
     "XLP",
     "XLU",
     "XLE",
     "XLRE",
-    "XLB",
+    "XLC",
 ]
 
 exclusion_list = [
-    "XLU",
-    "XLE",
     "XLRE",
-    "XLB",
+    "XLC",
 ]
 
 trade_list = [ticker for ticker in universe if ticker not in exclusion_list]
