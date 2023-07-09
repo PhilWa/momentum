@@ -11,15 +11,16 @@ from process_json import get_params
 
 warnings.filterwarnings("ignore")  # should be removed in production
 
+### Parametrize script ###
 
-parser = argparse.ArgumentParser(description="A simple argument parser")
+parser = argparse.ArgumentParser(description="Parser for momentum.py parameters")
 parser.add_argument(
     "-g", "--grid", default=False, type=bool, help="Activate grid search"
 )
 args = parser.parse_args()
 
 # Load the parameters from the JSON file
-data, unique_id = get_params("data")
+data, PARAMETER_ID = get_params("data")
 
 START_DATE = data["Start_Date"]
 END_DATE = data["End_Date"]
@@ -29,7 +30,11 @@ SKIP_LAST_PERIOD = data["Skip_Last_Period"]  # False
 HOLD_PERIOD = data["Rebalancing"][0]  # (1, 'm')
 N_HOLDINGS = data["Holdings"]  # 3
 FEE_PER_TRADE = data["Fee_Per_Trade"]
-unique_run_id = str(uuid.uuid4())
+
+EXPERIMENT_ID = data.get(
+    "experiment_id", str(uuid.uuid4())
+)  # only present in gridsearch
+RUN_ID = str(uuid.uuid4())
 
 
 class TradingStrategy:
@@ -48,6 +53,7 @@ class TradingStrategy:
                 "Timestamp",
                 "unique_param_id",
                 "unique_run_id",
+                "unique_experiment_id",
             ],
         )
 
@@ -83,9 +89,13 @@ class TradingStrategy:
 
     def sell_positions(self, date, trading_fee: float, hold_period: int):
         buy_log = self.trade_log[self.trade_log["Action"] == "BUY"]
-        buy_log_grouped = buy_log.groupby("Ticker")["Quantity"].sum()
+        buy_log_grouped = buy_log.groupby("Ticker")[
+            "Quantity"
+        ].sum()  # TODO inspect why we need to sum the quantity
         sell_log = self.trade_log[self.trade_log["Action"] == "SELL"]
-        sell_log_grouped = sell_log.groupby("Ticker")["Quantity"].sum()
+        sell_log_grouped = sell_log.groupby("Ticker")[
+            "Quantity"
+        ].sum()  # TODO inspect why we need to sum the quantity
         positions = buy_log_grouped.subtract(sell_log_grouped, fill_value=0)
 
         for ticker in positions.index:
@@ -148,8 +158,9 @@ class TradingStrategy:
                     "PnL": np.round(trade_pnl, 2),
                     "cash_balance": np.round(self.cash_balance, 2),
                     "Timestamp": datetime.now(),
-                    "unique_param_id": unique_id,
-                    "unique_run_id": unique_run_id,
+                    "unique_param_id": PARAMETER_ID,
+                    "unique_run_id": RUN_ID,
+                    "unique_experiment_id": EXPERIMENT_ID,
                 },
                 ignore_index=True,
             )
@@ -191,8 +202,9 @@ class TradingStrategy:
                 "PnL": None,
                 "cash_balance": np.round(self.cash_balance, 2),
                 "Timestamp": datetime.now(),
-                "unique_param_id": unique_id,
-                "unique_run_id": unique_run_id,
+                "unique_param_id": PARAMETER_ID,
+                "unique_run_id": RUN_ID,
+                "unique_experiment_id": EXPERIMENT_ID,
             },
             ignore_index=True,
         )
@@ -247,7 +259,7 @@ class TradingStrategy:
             "elapsed time: ",
             end_time - start_time,
             "unique_param_id: ",
-            unique_id,
+            PARAMETER_ID,
         )
 
     @staticmethod
