@@ -225,8 +225,19 @@ def get_experiment_metrics(df):
     return qs.reports.metrics(strategy, mode="full", display=False).T
 
 
+def calc_cagr(df):
+    start_date = df["Date"].min()
+    end_date = df["Date"].max()
+    years = (end_date - start_date).days / 365
+    # Calculate CAGR
+    cagr = (df["NetLiq"].iloc[-1] / df["NetLiq"].iloc[0]) ** (1 / years) - 1
+    return cagr
+
+
 def digest_results(df, param_id: str, run_id: str, experiment_id: str):
+    custom_cgar = calc_cagr(df)
     res = get_experiment_metrics(df)
+    res["custom_cgar"] = custom_cgar
     res["param_id"] = param_id
     res["run_id"] = run_id
     res["experiment_id"] = experiment_id

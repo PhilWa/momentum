@@ -16,13 +16,13 @@ def create_parameter_combinations(param_dict):
 # Here the question is how we want to come up with the gridsearch params
 params_json = """
 {
-    "Start_Date": ["2022-01-01"],
+    "Start_Date": ["2000-01-01"],
     "End_Date": ["2022-12-31"],
     "Starting_Balance": [100000],
-    "Look_Back_Periods": ["12m", "5m"],
+    "Look_Back_Periods": ["12m", "9m", "6m"],
     "Skip_Last_Period": ["yes","no"],
-    "Rebalancing": ["1m"],
-    "Holdings": [2,3],
+    "Rebalancing": ["1m", "3m", "6m"],
+    "Holdings": [2,3,6],
     "Fee_Per_Trade": [1]
 }
 """
@@ -38,6 +38,6 @@ for parameter in tqdm(parameters):
         json.dump(parameter, f, indent=4)
     command = ["python", "momentum.py", "--grid", "False"]
     subprocess.run(command, shell=False, capture_output=False)
-    command = ["python", "analyze_trade_log.py"]
+    command = ["python", "analyze.py"]
     subprocess.run(command, shell=False, capture_output=False)
 print("Time taken: ", datetime.now() - start_time)

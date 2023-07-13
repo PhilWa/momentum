@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 import uuid
 import warnings
 import argparse
+from utils import open_positions
 from process_json import get_params
 
 warnings.filterwarnings("ignore")  # should be removed in production
@@ -91,11 +92,9 @@ class TradingStrategy:
         buy_log = self.trade_log[self.trade_log["Action"] == "BUY"]
         buy_log_grouped = buy_log.groupby("Ticker")[
             "Quantity"
-        ].sum()  # TODO inspect why we need to sum the quantity
+        ].sum()  # we take all from buy and sell and look at the diff.
         sell_log = self.trade_log[self.trade_log["Action"] == "SELL"]
-        sell_log_grouped = sell_log.groupby("Ticker")[
-            "Quantity"
-        ].sum()  # TODO inspect why we need to sum the quantity
+        sell_log_grouped = sell_log.groupby("Ticker")["Quantity"].sum()
         positions = buy_log_grouped.subtract(sell_log_grouped, fill_value=0)
 
         for ticker in positions.index:
@@ -105,7 +104,6 @@ class TradingStrategy:
                 # Normalize the dates to the first day of the month
                 _date = date.replace(day=1)
                 _last_buy_date = last_buy_date.replace(day=1)
-
                 if _date >= _last_buy_date + relativedelta(months=hold_period):
                     self.sell_position(ticker, date, trading_fee)
 
@@ -167,10 +165,18 @@ class TradingStrategy:
 
     def buy_positions(self, date, trading_fee, n_holdings):
         tickers_momentum = self.get_tickers_momentum(date)
+
+        open_tickers = open_positions(self.trade_log)
+        can_buy = n_holdings > len(open_tickers)
         cash_per_position = self.cash_balance / n_holdings
-        for ticker, momentum in tickers_momentum[:n_holdings]:
-            if momentum > 0 and self.cash_balance > 0:
-                self.buy_position(ticker, date, cash_per_position, trading_fee)
+        if can_buy:
+            for ticker, momentum in tickers_momentum[:n_holdings]:
+                if (
+                    momentum > 0
+                    and (self.cash_balance > 0)
+                    and (ticker not in open_tickers)
+                ):
+                    self.buy_position(ticker, date, cash_per_position, trading_fee)
 
     def get_tickers_momentum(self, date):
         tickers_momentum = [
@@ -209,15 +215,6 @@ class TradingStrategy:
             ignore_index=True,
         )
 
-    def market_filter(self, indicator: str, smaller_than: int, date: str) -> bool:
-        if indicator != "^VIX":
-            raise ValueError("Only ^VIX is supported for the market filter.")
-        df = self.get_data(indicator, date, date + timedelta(days=3))
-        print("📈 Market filter:", indicator, "|", df["Close"][0])
-        return (
-            df["Close"][0] < smaller_than
-        )  # Wenn Vix> 30, dann verkauf, aber kauf keine neue Position
-
     def run(self, start_date, end_date):
         start_time = datetime.now()
         print(
@@ -237,19 +234,15 @@ class TradingStrategy:
             print("🌱 New month:", date)
             print(" New day:", closest_trading_day)
 
-            if not self.trade_log.empty:
+            if not self.trade_log.empty:  # here something goes wrong...
                 self.sell_positions(
                     closest_trading_day,
                     FEE_PER_TRADE,
                     HOLD_PERIOD,
                 )
 
-            if self.market_filter(
-                indicator="^VIX",
-                smaller_than=30,
-                date=closest_trading_day,
-            ):
-                self.buy_positions(closest_trading_day, FEE_PER_TRADE, N_HOLDINGS)
+            self.buy_positions(closest_trading_day, FEE_PER_TRADE, N_HOLDINGS)
+        self.sell_positions(closest_trading_day, 0, 0)  # exit all positions
 
         self.save_log()
         end_time = datetime.now()
