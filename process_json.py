@@ -7,7 +7,6 @@ def get_latest_json(dir_path: str) -> str:
     """Get the path of the most recently modified .json file."""
     # Get a list of all .json files in the directory.
     json_files = [f for f in os.listdir(dir_path) if f.endswith(".json")]
-
     # Sort the files by modification time.
     json_files.sort(key=lambda f: os.path.getmtime(os.path.join(dir_path, f)))
 
@@ -48,7 +47,6 @@ def split_into_time_and_period(data_str: str) -> dict:
     """Curate the look back period."""
     if not any(char in data_str for char in ["m", "d", "y"]):
         return ValueError('Input not valid. Must contain "m", "d", or "y".')
-
     # Get the number of days, months, and years.
     match = re.match(r"(\d+)(\D+)", data_str, re.I)
     if match:
@@ -64,6 +62,7 @@ def curate_skip_last_period(data_str: str) -> bool:
 
 def modify_data(data: dict) -> dict:
     """Modify the fields in the data."""
+    print("data", data)
     data["Start_Date"] = get_date(data["Start_Date"])
     data["End_Date"] = get_date(data["End_Date"])
     data["Starting_Balance"] = check_for_number(data["Starting_Balance"], "int")

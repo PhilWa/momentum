@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 import uuid
 import warnings
 import argparse
-from utils import open_positions
+from utils import open_positions, get_data
 from process_json import get_params
 
 warnings.filterwarnings("ignore")  # should be removed in production
@@ -36,6 +36,7 @@ EXPERIMENT_ID = data.get(
     "experiment_id", str(uuid.uuid4())
 )  # only present in gridsearch
 RUN_ID = str(uuid.uuid4())
+DATA_SOURCE = "yahoo"
 
 
 class TradingStrategy:
@@ -64,20 +65,8 @@ class TradingStrategy:
         momentum_date = date - relativedelta(
             months=one_month
         )  # 2022-05-02 00:00:00 -> 2022-04-02 00:00:00
-        df = self.get_data(ticker, start_date, momentum_date)
+        df = get_data(ticker, start_date, momentum_date, DATA_SOURCE)
         return self.compute_momentum(df)
-
-    @staticmethod
-    def get_data(ticker, start_date, end_date, max_attempts=5):
-        for i in range(max_attempts):
-            df = yf.download(ticker, start=start_date, end=end_date, progress=False)
-            if not df.empty:
-                return df
-            else:
-                pass
-
-        print("Max attempts exceeded for: ", ticker, start_date, end_date)
-        return pd.DataFrame()  # return an empty DataFrame if all attempts fail
 
     @staticmethod
     def compute_momentum(df):
@@ -108,7 +97,7 @@ class TradingStrategy:
                     self.sell_position(ticker, date, trading_fee)
 
     def sell_position(self, ticker, date, trading_fee):
-        df = self.get_data(ticker, date, date + timedelta(days=3))
+        df = get_data(ticker, date, date + timedelta(days=3), DATA_SOURCE)
         if not df.empty:
             self.execute_sell(df, ticker, date, trading_fee)
 
@@ -188,7 +177,7 @@ class TradingStrategy:
         return tickers_momentum
 
     def buy_position(self, ticker, date, cash_per_position, trading_fee):
-        df = self.get_data(ticker, date, date + timedelta(days=3))
+        df = get_data(ticker, date, date + timedelta(days=3), DATA_SOURCE)
         if not df.empty:
             print("🛍️ Buy ", ticker, " for 💵 ", np.round(cash_per_position, 2), "USD")
             self.execute_buy(df, ticker, date, cash_per_position, trading_fee)
