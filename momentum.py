@@ -7,7 +7,13 @@ from dateutil.relativedelta import relativedelta
 import uuid
 import warnings
 import argparse
-from utils import open_positions, get_data
+from typing import List
+from utils import (
+    open_positions,
+    get_data,
+    load_sp500_historic_tickers,
+    get_current_universe,
+)
 from process_json import get_params
 
 warnings.filterwarnings("ignore")  # should be removed in production
@@ -36,12 +42,13 @@ EXPERIMENT_ID = data.get(
     "experiment_id", str(uuid.uuid4())
 )  # only present in gridsearch
 RUN_ID = str(uuid.uuid4())
-DATA_SOURCE = "yahoo"
+DATA_SOURCE = "db"
 
 
 class TradingStrategy:
-    def __init__(self, tickers):
+    def __init__(self, tickers: List[str] = ["SPY"]):
         self.tickers = tickers
+        self.spy_ticker_history = load_sp500_historic_tickers()
         self.cash_balance = STARTING_BALANCE
         self.trade_log = pd.DataFrame(
             columns=[
@@ -81,7 +88,7 @@ class TradingStrategy:
         buy_log = self.trade_log[self.trade_log["Action"] == "BUY"]
         buy_log_grouped = buy_log.groupby("Ticker")[
             "Quantity"
-        ].sum()  # we take all from buy and sell and look at the diff.
+        ].sum()  # we take all quantity from buy and sell and look at the diff.
         sell_log = self.trade_log[self.trade_log["Action"] == "SELL"]
         sell_log_grouped = sell_log.groupby("Ticker")["Quantity"].sum()
         positions = buy_log_grouped.subtract(sell_log_grouped, fill_value=0)
@@ -173,7 +180,7 @@ class TradingStrategy:
         ]
         tickers_momentum.sort(key=lambda x: x[1], reverse=True)
         print("💼 Ticker |🌀 Momentum")
-        _ = [print(i[0], "|", i[1]) for i in tickers_momentum]
+        # [print(i[0], "|", i[1]) for i in tickers_momentum]
         return tickers_momentum
 
     def buy_position(self, ticker, date, cash_per_position, trading_fee):
@@ -223,13 +230,17 @@ class TradingStrategy:
             print("🌱 New month:", date)
             print(" New day:", closest_trading_day)
 
-            if not self.trade_log.empty:  # here something goes wrong...
+            if not self.trade_log.empty:
                 self.sell_positions(
                     closest_trading_day,
                     FEE_PER_TRADE,
                     HOLD_PERIOD,
                 )
 
+            if DATA_SOURCE == "db":
+                self.tickers = get_current_universe(
+                    self.spy_ticker_history, closest_trading_day
+                )
             self.buy_positions(closest_trading_day, FEE_PER_TRADE, N_HOLDINGS)
         self.sell_positions(closest_trading_day, 0, 0)  # exit all positions
 
@@ -255,19 +266,7 @@ class TradingStrategy:
                 self.trade_log.to_csv(f, header=f.tell() == 0, index=False)
 
 
-universe = [
-    "XLK",
-    "XLV",
-    "XLF",
-    "XLY",
-    "XLB",
-    "XLI",
-    "XLP",
-    "XLU",
-    "XLE",
-    "XLRE",
-    "XLC",
-]
+universe = ["ADI", "ADM", "ADSK", "ADT"]
 
 exclusion_list = [
     "XLRE",
@@ -275,6 +274,6 @@ exclusion_list = [
 ]
 
 trade_list = [ticker for ticker in universe if ticker not in exclusion_list]
-strategy = TradingStrategy(trade_list)
+strategy = TradingStrategy()
 
 strategy.run(START_DATE, END_DATE)

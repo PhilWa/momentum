@@ -1,0 +1,242 @@
+[
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "12m",
+        "Skip_Last_Period": "yes",
+        "Rebalancing": "1m",
+        "Holdings": 2,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "12m",
+        "Skip_Last_Period": "yes",
+        "Rebalancing": "1m",
+        "Holdings": 3,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "12m",
+        "Skip_Last_Period": "yes",
+        "Rebalancing": "1m",
+        "Holdings": 4,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "12m",
+        "Skip_Last_Period": "yes",
+        "Rebalancing": "1m",
+        "Holdings": 5,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "12m",
+        "Skip_Last_Period": "no",
+        "Rebalancing": "1m",
+        "Holdings": 2,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "12m",
+        "Skip_Last_Period": "no",
+        "Rebalancing": "1m",
+        "Holdings": 3,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "12m",
+        "Skip_Last_Period": "no",
+        "Rebalancing": "1m",
+        "Holdings": 4,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "12m",
+        "Skip_Last_Period": "no",
+        "Rebalancing": "1m",
+        "Holdings": 5,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "1m",
+        "Skip_Last_Period": "yes",
+        "Rebalancing": "1m",
+        "Holdings": 2,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "1m",
+        "Skip_Last_Period": "yes",
+        "Rebalancing": "1m",
+        "Holdings": 3,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "1m",
+        "Skip_Last_Period": "yes",
+        "Rebalancing": "1m",
+        "Holdings": 4,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "1m",
+        "Skip_Last_Period": "yes",
+        "Rebalancing": "1m",
+        "Holdings": 5,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "1m",
+        "Skip_Last_Period": "no",
+        "Rebalancing": "1m",
+        "Holdings": 2,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "1m",
+        "Skip_Last_Period": "no",
+        "Rebalancing": "1m",
+        "Holdings": 3,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "1m",
+        "Skip_Last_Period": "no",
+        "Rebalancing": "1m",
+        "Holdings": 4,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "1m",
+        "Skip_Last_Period": "no",
+        "Rebalancing": "1m",
+        "Holdings": 5,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "5m",
+        "Skip_Last_Period": "yes",
+        "Rebalancing": "1m",
+        "Holdings": 2,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "5m",
+        "Skip_Last_Period": "yes",
+        "Rebalancing": "1m",
+        "Holdings": 3,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "5m",
+        "Skip_Last_Period": "yes",
+        "Rebalancing": "1m",
+        "Holdings": 4,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "5m",
+        "Skip_Last_Period": "yes",
+        "Rebalancing": "1m",
+        "Holdings": 5,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "5m",
+        "Skip_Last_Period": "no",
+        "Rebalancing": "1m",
+        "Holdings": 2,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "5m",
+        "Skip_Last_Period": "no",
+        "Rebalancing": "1m",
+        "Holdings": 3,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "5m",
+        "Skip_Last_Period": "no",
+        "Rebalancing": "1m",
+        "Holdings": 4,
+        "Fee_Per_Trade": 1
+    },
+    {
+        "Start_Date": "2022-01-01",
+        "End_Date": "2022-12-31",
+        "Starting_Balance": 100000,
+        "Look_Back_Periods": "5m",
+        "Skip_Last_Period": "no",
+        "Rebalancing": "1m",
+        "Holdings": 5,
+        "Fee_Per_Trade": 1
+    }
+]

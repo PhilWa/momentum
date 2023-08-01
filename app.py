@@ -80,6 +80,7 @@ app.layout = dbc.Container(
                                 {"label": "24 months", "value": "24m"},
                             ],
                             placeholder="Select look back period",
+                            multi=True,
                         ),
                     ],
                     md=4,
@@ -103,6 +104,7 @@ app.layout = dbc.Container(
                                 {"label": "No", "value": "no"},
                             ],
                             placeholder="Select skip last period",
+                            multi=True,
                         ),
                     ],
                     md=4,
@@ -125,6 +127,7 @@ app.layout = dbc.Container(
                                 {"label": "6 months", "value": "6m"},
                             ],
                             placeholder="Select rebalancing period",
+                            multi=True,
                         ),
                     ],
                     md=4,
@@ -137,16 +140,10 @@ app.layout = dbc.Container(
                         dcc.Dropdown(
                             id="holdings-dropdown",
                             options=[
-                                {"label": "3", "value": 3},
-                                {"label": "4", "value": 4},
-                                {"label": "5", "value": 5},
-                                {"label": "6", "value": 6},
-                                {"label": "7", "value": 7},
-                                {"label": "8", "value": 8},
-                                {"label": "9", "value": 9},
-                                {"label": "10", "value": 10},
+                                {"label": str(i), "value": i} for i in range(1, 11)
                             ],
                             placeholder="Select number of holdings",
+                            multi=True,
                         ),
                     ],
                     md=4,
@@ -167,6 +164,7 @@ app.layout = dbc.Container(
                             id="fee-per-trade-dropdown",
                             options=[{"label": str(i), "value": i} for i in range(6)],
                             placeholder="Select fee per trade",
+                            multi=True,
                         ),
                     ],
                     md=4,
@@ -295,7 +293,11 @@ def run_backtest(run_button_clicks):
             data_dict["run_backtest"] = True
             latest_json_file, _ = get_latest_json("data")
             latest_uuid = os.path.splitext(latest_json_file)[0]
-            subprocess.call(["python", "momentum.py"])
+            if df.shape[0] > 1:
+                subprocess.call(["python", "gridsearch.py"])
+            else:
+                subprocess.call(["python", "momentum.py"])
+
             return f"Running backtest based on: {latest_uuid}"
         else:
             return "No parameters specified to run backtest on. Please save some data first."

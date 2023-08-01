@@ -3,6 +3,7 @@ import warnings
 import yfinance as yf
 import pandas_market_calendars as mcal
 from datetime import datetime
+from utils.utils import get_data
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -101,22 +102,22 @@ for ticker in unique_tickers:
         ticker_qty_perDay_copy
     )
 
+if False:
+    # NEXT: Add historical data for tickers
+    def get_data(ticker, start_date, end_date, max_attempts=5):
+        for i in range(max_attempts):
+            df = yf.download(ticker, start=start_date, end=end_date, progress=False)
+            if not df.empty:
+                return df
+            else:
+                pass
 
-# NEXT: Add historical data for tickers
-def get_data(ticker, start_date, end_date, max_attempts=5):
-    for i in range(max_attempts):
-        df = yf.download(ticker, start=start_date, end=end_date, progress=False)
-        if not df.empty:
-            return df
-        else:
-            pass
-
-    print("Max attempts exceeded for:", ticker, start_date, end_date)
-    return pd.DataFrame()  # return an empty DataFrame if all attempts fail
+        print("Max attempts exceeded for:", ticker, start_date, end_date)
+        return pd.DataFrame()  # return an empty DataFrame if all attempts fail
 
 
 for ticker in unique_tickers:
-    histData = get_data(ticker, start_date, end_date, max_attempts=5)
+    histData = get_data(ticker, start_date, end_date, source="db")
     df_dailyPortfolio = pd.merge(df_dailyPortfolio, histData, on="Date", how="left")
     df_dailyPortfolio = df_dailyPortfolio.drop(
         ["Open", "High", "Low", "Adj Close", "Volume"], axis=1
