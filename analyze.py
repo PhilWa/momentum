@@ -7,12 +7,6 @@ from utils.utils import get_data
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-### Hello World!
-var1 = 1
-var2 = 2
-var3 = var1 + var2
-var4 = var1 * var2
-
 ### IMPORT TRADELOG
 # Specify the file path
 file_path = r"data/trade_log.csv"
