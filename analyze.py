@@ -8,7 +8,7 @@ from utils.utils import get_data
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 ### Hello World!
-var1 = 1
+var1 = 2
 var2 = 2
 var3 = var1 + var2
 
